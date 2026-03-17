@@ -5,7 +5,7 @@ if(WIN32 AND NOT DEFINED VCPKG_TARGET_TRIPLET)
     set(VCPKG_TARGET_TRIPLET "x64-windows-static" CACHE STRING "vcpkg triplet")
 endif()
 
-project(MagicMouse VERSION 0.1.1 LANGUAGES CXX)
+project(MagicMouse VERSION 0.1.2 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -35,14 +35,16 @@ add_subdirectory(service)
 # ── Phase 3: Tray host + Settings UI ─────────────────────────────────────────
 add_subdirectory(tools/tray_host)
 
-# Build the WinUI 3 settings app via dotnet (requires Windows App SDK)
+# Build the WinUI 3 settings app via dotnet publish (self-contained for unpackaged WinUI 3)
 find_program(DOTNET_EXE dotnet)
 if(DOTNET_EXE)
     add_custom_target(settings_app ALL
-        COMMAND ${DOTNET_EXE} build ${CMAKE_SOURCE_DIR}/ui/settings_app/SettingsApp.csproj
+        COMMAND ${DOTNET_EXE} publish ${CMAKE_SOURCE_DIR}/ui/settings_app/SettingsApp.csproj
                 --configuration $<CONFIG>
+                --runtime win-x64
+                --self-contained true
                 --output ${CMAKE_BINARY_DIR}/ui/settings_app
-        COMMENT "Building WinUI 3 settings app"
+        COMMENT "Publishing WinUI 3 settings app (self-contained x64)"
     )
 endif()
 
