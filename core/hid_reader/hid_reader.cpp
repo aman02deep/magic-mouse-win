@@ -20,7 +20,9 @@ HidReader::HidReader(const std::string& device_path)
         if (err) {
             // Convert wchar_t* to string for the error message
             std::wstring ws(err);
-            msg += std::string(ws.begin(), ws.end());
+            std::string s(ws.length(), ' ');
+            for (size_t i = 0; i < ws.length(); ++i) s[i] = static_cast<char>(ws[i]);
+            msg += s;
         } else {
             msg += device_path;
         }
@@ -68,7 +70,9 @@ std::string HidReader::lastError() const {
     const wchar_t* err = hid_error(device_);
     if (!err) return {};
     std::wstring ws(err);
-    return std::string(ws.begin(), ws.end());
+    std::string s(ws.length(), ' ');
+    for (size_t i = 0; i < ws.length(); ++i) s[i] = static_cast<char>(ws[i]);
+    return s;
 }
 
 } // namespace magicmouse

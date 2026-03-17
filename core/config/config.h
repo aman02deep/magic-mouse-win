@@ -73,7 +73,7 @@ class ConfigManager {
 public:
     ConfigManager();
 
-    /// Load config from standard paths under %LocalAppData%\MagicMouse\config\
+    /// Load config from standard paths under %LocalAppData%\MagicMouse\config
     bool load();
 
     /// Load per-app profile overlay (matched by foreground exe name)

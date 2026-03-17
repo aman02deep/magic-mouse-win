@@ -8,7 +8,11 @@ namespace {
     std::string wideToUtf8(const wchar_t* wide) {
         if (!wide) return {};
         std::wstring ws(wide);
-        return std::string(ws.begin(), ws.end());
+        std::string s(ws.length(), ' ');
+        for (size_t i = 0; i < ws.length(); ++i) {
+            s[i] = static_cast<char>(ws[i]);
+        }
+        return s;
     }
 
     std::string modelName(uint16_t pid) {
