@@ -65,11 +65,7 @@
               KeyPath="no" />
         </Component>
 
-        <Component Id="SettingsAppBinary" Guid="C3D4E5F6-A7B8-9012-CDEF-333344445555">
-          <File Id="SettingsAppExe"
-                Source="$(var.BuildDir)\ui\settings_app\settings_app.exe"
-                KeyPath="yes" />
-        </Component>
+
 
         <!-- Default config -->
         <Directory Id="ConfigDir" Name="configs">
@@ -102,11 +98,15 @@
       </Directory>
     </StandardDirectory>
 
+    <ComponentGroup Id="SettingsAppComponents" Directory="INSTALLFOLDER">
+      <Files Include="$(var.BuildDir)\ui\settings_app\**" />
+    </ComponentGroup>
+
     <!-- Feature tree -->
     <Feature Id="MainFeature" Title="Magic Mouse" Level="1">
       <ComponentRef Id="ServiceBinary" />
       <ComponentRef Id="TrayHostBinary" />
-      <ComponentRef Id="SettingsAppBinary" />
+      <ComponentGroupRef Id="SettingsAppComponents" />
       <ComponentRef Id="DefaultConfig" />
       <ComponentRef Id="StartMenuShortcut" />
     </Feature>

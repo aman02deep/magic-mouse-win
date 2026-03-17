@@ -1,4 +1,10 @@
 cmake_minimum_required(VERSION 3.20)
+
+# Default to static linking on Windows to avoid missing DLLs (hidapi, MSVCRT) in the installer
+if(WIN32 AND NOT DEFINED VCPKG_TARGET_TRIPLET)
+    set(VCPKG_TARGET_TRIPLET "x64-windows-static" CACHE STRING "vcpkg triplet")
+endif()
+
 project(MagicMouse VERSION 0.1.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
