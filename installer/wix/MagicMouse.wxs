@@ -12,7 +12,6 @@
       Version="0.1.1"
       UpgradeCode="B3A4C5D6-E7F8-9012-ABCD-EF1234567890"
       InstallerVersion="500"
-      Platform="x64"
       Compressed="true">
 
     <!-- Allow major upgrades (uninstall old, install new automatically) -->

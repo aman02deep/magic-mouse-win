@@ -7,6 +7,7 @@ if(WIX_EXE)
     add_custom_target(installer
         COMMAND ${WIX_EXE} build
                 "${CMAKE_CURRENT_SOURCE_DIR}/MagicMouse.wxs"
+                -arch x64
                 -d "BuildDir=${CMAKE_BINARY_DIR}"
                 -d "SourceDir=${CMAKE_SOURCE_DIR}"
                 -o "${INSTALLER_OUT}"
