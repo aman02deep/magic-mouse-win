@@ -35,10 +35,5 @@ target_link_libraries(MagicMouseService
 
 target_compile_features(MagicMouseService PRIVATE cxx_std_17)
 
-# Windows subsystem: console for debug, windows for release
-if(CMAKE_BUILD_TYPE STREQUAL "Release")
-    set_target_properties(MagicMouseService PROPERTIES
-        WIN32_EXECUTABLE TRUE
-        LINK_FLAGS "/SUBSYSTEM:WINDOWS"
-    )
-endif()
+# Windows Service executables can use /SUBSYSTEM:CONSOLE with standard main()
+# This allows it to run interactively via `--console` for debugging while still functioning as a service.
