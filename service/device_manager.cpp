@@ -106,7 +106,7 @@ void DeviceManager::readerLoop() {
 void DeviceManager::scheduleRetry() {
     std::this_thread::sleep_for(std::chrono::milliseconds(retry_delay_ms_));
     // Exponential back-off: 500 → 1000 → 2000 → 5000ms
-    retry_delay_ms_ = std::min(retry_delay_ms_ * 2, kMaxRetryDelayMs);
+    retry_delay_ms_ = (std::min)(retry_delay_ms_ * 2, kMaxRetryDelayMs);
 }
 
 } // namespace magicmouse
