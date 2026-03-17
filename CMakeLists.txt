@@ -39,3 +39,7 @@ if(DOTNET_EXE)
         COMMENT "Building WinUI 3 settings app"
     )
 endif()
+
+# ── Phase 4/5: Hardening & Advanced ─────────────────────────────────────────
+add_subdirectory(core/plugin_api)
+add_subdirectory(installer/wix)
