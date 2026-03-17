@@ -64,6 +64,13 @@ jobs:
           path: build/tools/hid_logger/Release/hid_logger.exe
           if-no-files-found: warn
 
+      - name: Upload MagicMouseService
+        uses: actions/upload-artifact@v4
+        with:
+          name: magic_mouse_service
+          path: build/service/Release/MagicMouseService.exe
+          if-no-files-found: warn
+
       - name: Upload tray_host
         uses: actions/upload-artifact@v4
         with:
