@@ -8,9 +8,13 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <Platforms>x64</Platforms>
     <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
+
     <UseWinUI>true</UseWinUI>
     <EnableMsixTooling>true</EnableMsixTooling>
-    <EnableDefaultPageItems>false</EnableDefaultPageItems>
+    <EnableDefaultItems>true</EnableDefaultItems>
+    <EnableDefaultPageItems>true</EnableDefaultPageItems>
+    <WindowsPackageType>None</WindowsPackageType>
+
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <Optimize>false</Optimize>
