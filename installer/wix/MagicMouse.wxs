@@ -2,7 +2,7 @@
 <!--
     WiX v4 installer for Magic Mouse Windows.
     Build: wix build MagicMouse.wxs -o MagicMouse.msi
-    Requires WiX v4 CLI: dotnet tool install --global wix
+    Requires WiX v4 CLI: dotnet tool install -g wix
 -->
 <Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
 
