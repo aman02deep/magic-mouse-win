@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "gestures": {
+    "swipe_left":        { "action": "SEND_KEYS", "keys": "ALT+LEFT" },
+    "swipe_right":       { "action": "SEND_KEYS", "keys": "ALT+RIGHT" },
+    "swipe_up":          { "action": "SEND_KEYS", "keys": "WIN+TAB" },
+    "swipe_down":        { "action": "SEND_KEYS", "keys": "WIN+D" },
+    "three_finger_tap":  { "action": "MIDDLE_CLICK" },
+    "two_finger_tap":    { "action": "RIGHT_CLICK" },
+    "double_tap":        { "action": "NONE" }
+  },
+  "scroll": {
+    "natural": true,
+    "inertia": true,
+    "sensitivity": 1.2,
+    "decay": 0.92,
+    "max_speed": 80,
+    "dead_zone": 0.5,
+    "horizontal_enabled": true,
+    "horizontal_sensitivity": 1.0
+  },
+  "gesture_thresholds": {
+    "min_swipe_distance_px": 8,
+    "max_swipe_time_ms": 400,
+    "scroll_lock_threshold_px": 3,
+    "gesture_velocity_ratio": 2.0,
+    "double_tap_interval_ms": 250,
+    "tap_max_movement_px": 3,
+    "gesture_lock_ms": 300
+  },
+  "device": {
+    "preferred_serial": "",
+    "multi_device_policy": "first_connected"
+  },
+  "service": {
+    "log_level": "INFO",
+    "startup": "auto",
+    "update_channel": "stable"
+  }
+}
