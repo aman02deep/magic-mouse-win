@@ -27,7 +27,7 @@
         <!-- Main binaries -->
         <Component Id="ServiceBinary" Guid="A1B2C3D4-E5F6-7890-ABCD-111122223333">
           <File Id="ServiceExe"
-                Source="$(var.BuildDir)\service\Release\magic_mouse_service.exe"
+                Source="$(var.BuildDir)\service\Release\MagicMouseService.exe"
                 KeyPath="yes" />
 
           <!-- Register + auto-start the Windows service -->
