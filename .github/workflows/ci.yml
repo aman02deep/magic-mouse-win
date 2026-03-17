@@ -84,3 +84,18 @@ jobs:
           name: settings_app
           path: build/ui/settings_app/settings_app.exe
           if-no-files-found: warn
+
+      # ── Build & Upload Installer (MSI) ────────────────────────────────────────
+      - name: Install WiX v4 CLI
+        run: dotnet tool install --global wix
+
+      - name: Build MSI Installer
+        shell: pwsh
+        run: cmake --build build --target installer
+
+      - name: Upload Installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: MagicMouse-Installer
+          path: build/MagicMouse-*-Setup.msi
+          if-no-files-found: error
