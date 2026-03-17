@@ -16,6 +16,8 @@
     <EnableDefaultItems>true</EnableDefaultItems>
     <EnableDefaultPageItems>true</EnableDefaultPageItems>
     <WindowsPackageType>None</WindowsPackageType>
+    <EnableMsixTooling>true</EnableMsixTooling>
+    <AutoGenerateBindingRedirects>false</AutoGenerateBindingRedirects>
 
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
