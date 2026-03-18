@@ -1,6 +1,6 @@
 [package]
 name = "magic_mouse_service"
-version = "0.1.5"
+version = "0.1.6"
 edition = "2021"
 authors = ["MagicMouse Contributors"]
 description = "Background driver for the Apple Magic Mouse on Windows"

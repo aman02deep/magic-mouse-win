@@ -9,7 +9,7 @@
   <Package
       Name="Magic Mouse"
       Manufacturer="MagicMouse Contributors"
-      Version="0.1.5"
+      Version="0.1.6"
       UpgradeCode="B3A4C5D6-E7F8-9012-ABCD-EF1234567890"
       InstallerVersion="500"
       Compressed="true">

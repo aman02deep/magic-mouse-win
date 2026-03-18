@@ -86,7 +86,7 @@ fn driver_loop(shutdown_rx: crossbeam_channel::Receiver<()>) {
 
     // 2. Start IPC
     let cfg = Arc::clone(&config);
-    let _ipc = ipc::IpcServer::new(move |cmd| {
+    let ipc = Arc::new(ipc::IpcServer::new(move |cmd| {
         if cmd == "reload_config" {
             let mut mgr = ConfigManager::new();
             if mgr.load() {
@@ -95,7 +95,7 @@ fn driver_loop(shutdown_rx: crossbeam_channel::Receiver<()>) {
             }
         }
         r#"{"status":"error"}"#.to_string()
-    });
+    }));
 
     let api = HidApi::new().expect("Failed to initialize HID API");
     let mut buf = [0u8; 128];
@@ -125,6 +125,7 @@ fn driver_loop(shutdown_rx: crossbeam_channel::Receiver<()>) {
     let mut prev_touch_x: f32 = 0.0;
     let mut prev_touch_y: f32 = 0.0;
     let mut touching: bool = false;
+    let mut battery_poll = Instant::now();
 
     loop {
         if shutdown_rx.try_recv().is_ok() {
@@ -187,6 +188,19 @@ fn driver_loop(shutdown_rx: crossbeam_channel::Receiver<()>) {
                         }
                         gesture_engine.on_touch_frame(&points, now);
 
+                        // Broadcast touch positions to WPF settings UI
+                        // Normalize raw coords (~-2000..2000) to 0..1 for UI rendering
+                        let fingers_json: Vec<String> = points.iter().map(|p| {
+                            let nx = ((p.x + 2048.0) / 4096.0).clamp(0.0, 1.0);
+                            let ny = ((p.y + 2048.0) / 4096.0).clamp(0.0, 1.0);
+                            format!(r#"{{"x":{:.3},"y":{:.3}}}"#, nx, ny)
+                        }).collect();
+                        let touch_msg = format!(
+                            r#"{{"type":"touch","fingers":[{}]}}"#,
+                            fingers_json.join(",")
+                        );
+                        ipc.broadcast(touch_msg);
+
                         // Inject scroll from per-frame delta (only after first frame)
                         if touching {
                             let dx = raw_x - prev_touch_x;
@@ -209,6 +223,8 @@ fn driver_loop(shutdown_rx: crossbeam_channel::Receiver<()>) {
                         if touching {
                             gesture_engine.on_finger_lift(now);
                             scroll_engine.on_finger_lift(0.0, 0.0);
+                            // Notify UI that fingers lifted
+                            ipc.broadcast(r#"{"type":"touch","fingers":[]}"#.to_string());
                         }
                         touching = false;
                     }
