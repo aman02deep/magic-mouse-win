@@ -1,0 +1,11 @@
+[package]
+name = "hid_dump"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "hid_dump"
+path = "main.rs"
+
+[dependencies]
+hidapi = "2.6"
