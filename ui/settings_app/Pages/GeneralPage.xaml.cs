@@ -16,7 +16,7 @@ namespace MagicMouse.Settings.Pages;
 
 public partial class GeneralPage : UserControl
 {
-    private static readonly string ConfigPath = Path.Combine(
+    private static readonly string ConfigPath = System.IO.Path.Combine(
         AppContext.BaseDirectory, "..", "..", "..", "..", "..", "configs", "default.json");
 
     private JsonObject _config = new();
@@ -241,7 +241,7 @@ public partial class GeneralPage : UserControl
             _config["enabled"] = EnableToggle.IsChecked == true;
             _config["run_at_startup"] = StartupToggle.IsChecked == true;
 
-            var dir = Path.GetDirectoryName(ConfigPath)!;
+            var dir = System.IO.Path.GetDirectoryName(ConfigPath)!;
             Directory.CreateDirectory(dir);
             File.WriteAllText(ConfigPath,
                 JsonSerializer.Serialize(_config, new JsonSerializerOptions { WriteIndented = true }));
@@ -269,7 +269,7 @@ public partial class GeneralPage : UserControl
         if (key is null) return;
         if (enable)
         {
-            var exe = Path.Combine(AppContext.BaseDirectory, "tray_host.exe");
+            var exe = System.IO.Path.Combine(AppContext.BaseDirectory, "tray_host.exe");
             key.SetValue(valueName, $"\"{exe}\"");
         }
         else
