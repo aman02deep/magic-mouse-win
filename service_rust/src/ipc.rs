@@ -7,6 +7,11 @@ use windows::Win32::System::Pipes::{
     ConnectNamedPipe, CreateNamedPipeA, DisconnectNamedPipe, PIPE_READMODE_MESSAGE,
     PIPE_TYPE_MESSAGE, PIPE_WAIT, PIPE_UNLIMITED_INSTANCES,
 };
+use windows::Win32::Security::{
+    InitializeSecurityDescriptor, SetSecurityDescriptorDacl, SECURITY_ATTRIBUTES,
+    SECURITY_DESCRIPTOR, PSECURITY_DESCRIPTOR,
+};
+use windows::Win32::System::SystemServices::SECURITY_DESCRIPTOR_REVISION;
 
 pub struct IpcServer {
     running: Arc<Mutex<bool>>,
@@ -30,6 +35,28 @@ impl IpcServer {
             let pipe_name = CString::new("\\\\.\\pipe\\MagicMouseService").unwrap();
 
             while *run_flag.lock().unwrap() {
+                // Create a security descriptor that allows Everyone (NULL DACL)
+                let mut sd_attr = SECURITY_ATTRIBUTES {
+                    nLength: std::mem::size_of::<SECURITY_ATTRIBUTES>() as u32,
+                    lpSecurityDescriptor: std::ptr::null_mut(),
+                    bInheritHandle: windows::Win32::Foundation::FALSE,
+                };
+                
+                let mut sd = SECURITY_DESCRIPTOR::default();
+                unsafe {
+                    InitializeSecurityDescriptor(
+                        PSECURITY_DESCRIPTOR(&mut sd as *mut _ as *mut _),
+                        SECURITY_DESCRIPTOR_REVISION,
+                    ).unwrap();
+                    SetSecurityDescriptorDacl(
+                        PSECURITY_DESCRIPTOR(&mut sd as *mut _ as *mut _),
+                        true,
+                        None,
+                        false,
+                    ).unwrap();
+                }
+                sd_attr.lpSecurityDescriptor = &mut sd as *mut _ as *mut _;
+
                 let pipe: HANDLE = unsafe {
                     CreateNamedPipeA(
                         windows::core::PCSTR(pipe_name.as_ptr() as *const u8),
@@ -39,7 +66,7 @@ impl IpcServer {
                         4096,
                         4096,
                         0,
-                        None,
+                        Some(&sd_attr),
                     )
                 }
                 .unwrap_or(INVALID_HANDLE_VALUE);
