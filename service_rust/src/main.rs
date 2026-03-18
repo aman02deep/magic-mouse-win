@@ -11,6 +11,8 @@ use hidapi::HidApi;
 use std::ffi::OsString;
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
+use std::fs::OpenOptions;
+use std::io::Write;
 
 use windows_service::{
     define_windows_service,
@@ -127,6 +129,11 @@ fn driver_loop(shutdown_rx: crossbeam_channel::Receiver<()>) {
     let mut touching: bool = false;
     let mut battery_poll = Instant::now();
 
+    // Debug logging mechanism
+    let mut logs_written = 0;
+    let debug_path = "C:\\mm_debug.txt";
+    let _ = std::fs::remove_file(debug_path); // clear old log
+
     loop {
         if shutdown_rx.try_recv().is_ok() {
             break;
@@ -152,8 +159,18 @@ fn driver_loop(shutdown_rx: crossbeam_channel::Receiver<()>) {
 
         if let Some(ref r) = reader {
             match r.read(&mut buf, 16) {
-                Ok(bytes) if bytes >= 15 => {
-                    // ---------- Apple Magic Mouse 2 BT HID Report ----------
+                Ok(bytes) if bytes > 0 => {
+                    // --- DEBUG LOGGING ---
+                    if logs_written < 100 {
+                        if let Ok(mut file) = OpenOptions::new().create(true).append(true).open(debug_path) {
+                            let hex: Vec<String> = buf[..bytes].iter().map(|b| format!("{:02X}", b)).collect();
+                            let _ = writeln!(file, "[{}] len={} | {}", logs_written, bytes, hex.join(" "));
+                            logs_written += 1;
+                        }
+                    }
+
+                    if bytes >= 15 {
+                        // ---------- Apple Magic Mouse 2 BT HID Report ----------
                     // buf[0]    = Report ID
                     // buf[1]    = Button state
                     // buf[2..3] = X delta (i16 LE) — OS handles cursor movement
@@ -230,7 +247,7 @@ fn driver_loop(shutdown_rx: crossbeam_channel::Receiver<()>) {
                     }
                 }
                 Ok(_) => {
-                    // Short report or timeout — keep looping
+                    // 0 bytes read, just continue
                 }
                 Err(_) => {
                     // Device disconnected
