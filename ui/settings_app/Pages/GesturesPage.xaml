@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <ScrollViewer>
         <StackPanel MaxWidth="600" HorizontalAlignment="Left" MinWidth="400">
-            <TextBlock Text="Gestures" Style="{StaticResource TitleText}"/>
+            <TextBlock Text="Gestures" FontSize="24" FontWeight="SemiBold"/>
             
             <Expander IsExpanded="True" Margin="0,0,0,10">
                 <Expander.Header>
@@ -11,7 +11,7 @@
                 </Expander.Header>
                 <StackPanel Margin="20,10,10,10">
                     <CheckBox x:Name="SwipeEnabled" Content="Enable" IsChecked="True" Checked="Gesture_Toggled" Unchecked="Gesture_Toggled" Tag="swipe_enabled"/>
-                    <TextBlock Text="Sensitivity" Style="{StaticResource SubTitleText}" Margin="0,15,0,0"/>
+                    <TextBlock Text="Sensitivity" FontSize="16" FontWeight="SemiBold" Margin="0,15,0,0"/>
                     <Slider x:Name="SwipeSensitivity" Minimum="1" Maximum="10" Value="5" TickFrequency="1" TickPlacement="BottomRight" ValueChanged="Sensitivity_Changed" Tag="swipe_sensitivity"/>
                 </StackPanel>
             </Expander>
@@ -22,7 +22,7 @@
                 </Expander.Header>
                 <StackPanel Margin="20,10,10,10">
                     <CheckBox x:Name="ThreeFingerEnabled" Content="Enable" IsChecked="True" Checked="Gesture_Toggled" Unchecked="Gesture_Toggled" Tag="three_finger_enabled"/>
-                    <TextBlock Text="Sensitivity" Style="{StaticResource SubTitleText}" Margin="0,15,0,0"/>
+                    <TextBlock Text="Sensitivity" FontSize="16" FontWeight="SemiBold" Margin="0,15,0,0"/>
                     <Slider x:Name="ThreeFingerSensitivity" Minimum="1" Maximum="10" Value="5" TickFrequency="1" TickPlacement="BottomRight" ValueChanged="Sensitivity_Changed" Tag="three_finger_sensitivity"/>
                 </StackPanel>
             </Expander>

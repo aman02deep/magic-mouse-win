@@ -10,7 +10,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <Optimize>false</Optimize>
-    <Version>0.1.2</Version>
+    <Version>0.1.4</Version>
     <Authors>MagicMouse Contributors</Authors>
     <Description>Magic Mouse for Windows — Settings UI</Description>
   </PropertyGroup>

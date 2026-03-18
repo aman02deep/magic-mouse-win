@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <ScrollViewer>
         <StackPanel MaxWidth="600" HorizontalAlignment="Left">
-            <TextBlock Text="General" Style="{StaticResource TitleText}"/>
+            <TextBlock Text="General" FontSize="24" FontWeight="SemiBold"/>
             
             <CheckBox x:Name="EnableToggle" Content="Enable Magic Mouse driver" IsChecked="True" Checked="Toggle_Changed" Unchecked="Toggle_Changed"/>
             
@@ -12,7 +12,7 @@
             <Separator Margin="0,15"/>
             
             <CheckBox x:Name="StartupToggle" Content="Start with Windows" IsChecked="True" Checked="StartupToggle_Changed" Unchecked="StartupToggle_Changed"/>
-            <TextBlock Text="Adds tray_host.exe to your startup folder so Magic Mouse is always active." Style="{StaticResource CaptionText}"/>
+            <TextBlock Text="Adds tray_host.exe to your startup folder so Magic Mouse is always active." FontSize="12" Foreground="Gray"/>
             
             <Separator Margin="0,15"/>
             

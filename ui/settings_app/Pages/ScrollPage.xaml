@@ -3,30 +3,30 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <ScrollViewer>
         <StackPanel MaxWidth="600" HorizontalAlignment="Left">
-            <TextBlock Text="Scroll" Style="{StaticResource TitleText}"/>
+            <TextBlock Text="Scroll" FontSize="24" FontWeight="SemiBold"/>
             
             <CheckBox x:Name="NaturalScrollToggle" Content="Natural scrolling" Checked="NaturalScroll_Toggled" Unchecked="NaturalScroll_Toggled"/>
-            <TextBlock Text="Content moves in the same direction as your finger (like macOS)." Style="{StaticResource CaptionText}"/>
+            <TextBlock Text="Content moves in the same direction as your finger (like macOS)." FontSize="12" Foreground="Gray"/>
             
             <Separator Margin="0,15"/>
             
-            <TextBlock Text="Scroll speed" Style="{StaticResource SubTitleText}"/>
+            <TextBlock Text="Scroll speed" FontSize="16" FontWeight="SemiBold"/>
             <Slider x:Name="SpeedSlider" Minimum="1" Maximum="10" Value="5" TickFrequency="1" TickPlacement="BottomRight" ValueChanged="Speed_Changed"/>
             
             <Separator Margin="0,15"/>
             
             <CheckBox x:Name="InertiaToggle" Content="Momentum / inertia scrolling" Checked="Inertia_Toggled" Unchecked="Inertia_Toggled"/>
-            <TextBlock Text="Continues scrolling after you lift your finger, decelerating smoothly." Style="{StaticResource CaptionText}"/>
+            <TextBlock Text="Continues scrolling after you lift your finger, decelerating smoothly." FontSize="12" Foreground="Gray"/>
             
-            <StackPanel x:Name="InertiaPanel" Margin="0,10,0,0">
-                <TextBlock Text="Inertia friction" Style="{StaticResource SubTitleText}"/>
-                <Slider x:Name="FrictionSlider" Minimum="1" Maximum="10" Value="4" TickFrequency="1" TickPlacement="BottomRight" ValueChanged="Friction_Changed"/>
-                <TextBlock Text="Lower = longer coast; higher = snappier stop." Style="{StaticResource CaptionText}"/>
+            <StackPanel Margin="10,5,0,0">
+                <TextBlock Text="Inertia friction" FontSize="16" FontWeight="SemiBold"/>
+                <Slider x:Name="FrictionSlider" Minimum="0" Maximum="1" TickFrequency="0.05" ValueChanged="Slider_ValueChanged"/>
+                <TextBlock Text="Lower = longer coast; higher = snappier stop." FontSize="12" Foreground="Gray"/>
             </StackPanel>
             
             <Separator Margin="0,15"/>
             
-            <TextBlock Text="Acceleration curve" Style="{StaticResource SubTitleText}"/>
+            <TextBlock Text="Acceleration curve" FontSize="16" FontWeight="SemiBold"/>
             <ComboBox x:Name="CurveCombo" SelectedIndex="1" SelectionChanged="Curve_Changed">
                 <ComboBoxItem Content="Linear" />
                 <ComboBoxItem Content="Ease-in-out (recommended)" />
