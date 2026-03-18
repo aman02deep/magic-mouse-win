@@ -20,6 +20,7 @@ public partial class GeneralPage : UserControl
     {
         InitializeComponent();
         LoadConfig();
+        VersionText.Text = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "0.1.4";
     }
 
     private void LoadConfig()

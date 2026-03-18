@@ -18,7 +18,7 @@
             
             <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
                 <TextBlock Text="Version: "/>
-                <TextBlock x:Name="VersionText" Text="0.1.2" FontWeight="Bold"/>
+                <TextBlock x:Name="VersionText" FontWeight="Bold"/>
             </StackPanel>
             
         </StackPanel>

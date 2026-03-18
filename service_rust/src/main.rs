@@ -98,7 +98,7 @@ fn driver_loop(shutdown_rx: crossbeam_channel::Receiver<()>) {
     });
 
     let api = HidApi::new().expect("Failed to initialize HID API");
-    let mut buf = [0u8; 64];
+    let mut buf = [0u8; 128];
 
     // Scroll engine
     let scroll_params = ScrollParams::default(); // we should map from config, but omitting for brevity
@@ -120,6 +120,11 @@ fn driver_loop(shutdown_rx: crossbeam_channel::Receiver<()>) {
 
     let mut _current_device_path = String::new();
     let mut reader: Option<HidReader> = None;
+
+    // Track previous touch position for delta-based scroll
+    let mut prev_touch_x: f32 = 0.0;
+    let mut prev_touch_y: f32 = 0.0;
+    let mut touching: bool = false;
 
     loop {
         if shutdown_rx.try_recv().is_ok() {
@@ -145,34 +150,76 @@ fn driver_loop(shutdown_rx: crossbeam_channel::Receiver<()>) {
         }
 
         if let Some(ref r) = reader {
-            match r.read(&mut buf, 100) {
-                Ok(bytes) if bytes > 0 => {
-                    // Very simple parsing of Apple BT Report (for Magic Mouse)
-                    // Normally report[1] is states, report[4..] is touch packets
-                    // This is vastly simplified for demonstration
-                    
-                    let mut points = Vec::new();
-                    // Example touch mapping (pseudo format depending on MM1 / MM2):
-                    // If touch count > 0, we populate points
-                    
-                    // The time is needed for the engines:
+            match r.read(&mut buf, 16) {
+                Ok(bytes) if bytes >= 15 => {
+                    // ---------- Apple Magic Mouse 2 BT HID Report ----------
+                    // buf[0]    = Report ID
+                    // buf[1]    = Button state
+                    // buf[2..3] = X delta (i16 LE) — OS handles cursor movement
+                    // buf[4..5] = Y delta (i16 LE) — OS handles cursor movement
+                    // buf[6..13]= Unknown bytes
+                    // buf[14..] = Touch packets, 8 bytes per finger:
+                    //   bytes 0-1: touch X (i16 LE, ~1/100 mm units)
+                    //   bytes 2-3: touch Y (i16 LE)
+                    //   byte  4:   finger ID
+                    //   byte  5:   touch size/state
+                    //   bytes 6-7: misc
+
+                    let touch_data = &buf[14..bytes];
+                    let finger_count = touch_data.len() / 8;
                     let now = Instant::now().elapsed().as_millis() as i64;
 
-                    if buf[1] & 0x01 != 0 {
-                        // Pretend we read 1 finger
-                        points.push(TouchPoint { id: 1, x: buf[4] as f32, y: buf[5] as f32, pressure: 1.0 });
+                    if finger_count > 0 {
+                        // Parse first finger for delta scroll
+                        let raw_x = i16::from_le_bytes([touch_data[0], touch_data[1]]) as f32;
+                        let raw_y = i16::from_le_bytes([touch_data[2], touch_data[3]]) as f32;
+
+                        // Build touch points for gesture engine
+                        let mut points = Vec::new();
+                        for i in 0..finger_count {
+                            let o = i * 8;
+                            if o + 4 <= touch_data.len() {
+                                let fx = i16::from_le_bytes([touch_data[o], touch_data[o+1]]) as f32;
+                                let fy = i16::from_le_bytes([touch_data[o+2], touch_data[o+3]]) as f32;
+                                let fid = *touch_data.get(o+4).unwrap_or(&0) as i32;
+                                points.push(TouchPoint { id: fid, x: fx, y: fy, pressure: 1.0 });
+                            }
+                        }
                         gesture_engine.on_touch_frame(&points, now);
+
+                        // Inject scroll from per-frame delta (only after first frame)
+                        if touching {
+                            let dx = raw_x - prev_touch_x;
+                            let dy = raw_y - prev_touch_y;
+                            // Raw units are ~1/100 mm; scale to reasonable scroll ticks
+                            let scale = 0.04_f32;
+                            if dy.abs() > 0.5 {
+                                input::inject_scroll_v(-dy * scale);
+                            }
+                            if dx.abs() > 0.5 {
+                                input::inject_scroll_h(dx * scale);
+                            }
+                        }
+
+                        prev_touch_x = raw_x;
+                        prev_touch_y = raw_y;
+                        touching = true;
                     } else {
-                        gesture_engine.on_finger_lift(now);
-                        scroll_engine.on_finger_lift(0.0, 0.0);
+                        // Finger lift — hand off to inertia
+                        if touching {
+                            gesture_engine.on_finger_lift(now);
+                            scroll_engine.on_finger_lift(0.0, 0.0);
+                        }
+                        touching = false;
                     }
                 }
                 Ok(_) => {
-                    // Timeout, keep looping
+                    // Short report or timeout — keep looping
                 }
                 Err(_) => {
                     // Device disconnected
                     reader = None;
+                    touching = false;
                 }
             }
         } else {
