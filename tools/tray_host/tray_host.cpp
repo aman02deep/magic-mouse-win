@@ -15,7 +15,7 @@
 #include <shellapi.h>     // Shell_NotifyIcon, NOTIFYICONDATA
 #include <strsafe.h>
 
-#include "logger.h"
+// No longer using internal logger
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -48,7 +48,7 @@ static bool SendPipeMessage(const char* json) {
         OPEN_EXISTING, 0, nullptr);
 
     if (pipe == INVALID_HANDLE_VALUE) {
-        LOG_WARN("tray", "Could not connect to service pipe");
+        // log warning
         return false;
     }
 
@@ -127,7 +127,7 @@ static void OnSettings() {
     PROCESS_INFORMATION pi = {};
     if (!CreateProcessW(exePath, nullptr, nullptr, nullptr,
                         FALSE, 0, nullptr, nullptr, &si, &pi)) {
-        LOG_WARN("tray", "Failed to launch settings_app.exe");
+        // Failed to launch
         MessageBoxW(g_hWnd,
                     L"Could not open the Settings window.\n"
                     L"Make sure settings_app.exe is in the same folder.",
@@ -146,7 +146,6 @@ static void OnPause() {
     if (SendPipeMessage(cmd)) {
         g_paused = !g_paused;
         UpdateTrayTooltip(g_paused ? L"Magic Mouse (paused)" : kAppName);
-        LOG_INFO("tray", g_paused ? "sent pause" : "sent resume");
     } else {
         MessageBoxW(g_hWnd,
                     L"Could not reach the Magic Mouse service.\n"
@@ -161,7 +160,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPara
     switch (msg) {
         case WM_CREATE:
             AddTrayIcon(hWnd);
-            LOG_INFO("tray", "tray icon created");
+            // Register class failed
             return 0;
 
         case WM_TRAYICON:
@@ -196,18 +195,6 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPara
 int WINAPI wWinMain(HINSTANCE hInst, HINSTANCE, LPWSTR, int) {
     g_hInst = hInst;
 
-    // Init logger — writes to %APPDATA%\MagicMouse\logs
-    wchar_t appData[MAX_PATH] = {};
-    ExpandEnvironmentStringsW(L"%APPDATA%\\MagicMouse\\logs",
-                               appData, MAX_PATH);
-
-    char appDataA[MAX_PATH] = {};
-    WideCharToMultiByte(CP_UTF8, 0, appData, -1,
-                        appDataA, MAX_PATH, nullptr, nullptr);
-
-    mm::Logger::get().init(appDataA);
-    LOG_INFO("tray", "starting tray host");
-
     // Register window class (invisible, message-only hybrid).
     WNDCLASSEXW wc     = {};
     wc.cbSize          = sizeof(wc);
@@ -222,16 +209,17 @@ int WINAPI wWinMain(HINSTANCE hInst, HINSTANCE, LPWSTR, int) {
                               HWND_MESSAGE,   // message-only window
                               nullptr, hInst, nullptr);
     if (!g_hWnd) {
-        LOG_ERR("tray", "failed to create message window");
+        g_hWnd = nullptr;
+        PostQuitMessage(0);
         return 1;
     }
 
     MSG msg = {};
     while (GetMessageW(&msg, nullptr, 0, 0)) {
         TranslateMessage(&msg);
+        // Init componenttatic_cast<int>(msg.wParam);
         DispatchMessageW(&msg);
     }
 
-    LOG_INFO("tray", "tray host exiting");
     return static_cast<int>(msg.wParam);
 }

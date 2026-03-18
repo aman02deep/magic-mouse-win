@@ -1,41 +1,15 @@
 cmake_minimum_required(VERSION 3.20)
 
-# Default to static linking on Windows to avoid missing DLLs (hidapi, MSVCRT) in the installer
-if(WIN32 AND NOT DEFINED VCPKG_TARGET_TRIPLET)
-    set(VCPKG_TARGET_TRIPLET "x64-windows-static" CACHE STRING "vcpkg triplet")
-endif()
-
-project(MagicMouse VERSION 0.1.2 LANGUAGES CXX)
+project(MagicMouse VERSION 0.1.3 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-# vcpkg toolchain is passed via -DCMAKE_TOOLCHAIN_FILE
-find_package(hidapi CONFIG REQUIRED)
-find_package(nlohmann_json CONFIG REQUIRED)
-
-# ── Phase 0: Core HID libraries ──────────────────────────────────────────────
-add_subdirectory(core/hid_reader)
-add_subdirectory(core/device_detector)
-
-# ── Phase 0: Developer tools ──────────────────────────────────────────────────
-add_subdirectory(tools/hid_logger)
-
-# ── Phase 1/2: Engine libraries ───────────────────────────────────────────────
-add_subdirectory(core/logger)
-add_subdirectory(core/gesture_engine)
-add_subdirectory(core/scroll_engine)
-add_subdirectory(core/config)
-add_subdirectory(integration)
-
-# ── Phase 1/2: Windows Service ────────────────────────────────────────────────
-add_subdirectory(service)
-
-# ── Phase 3: Tray host + Settings UI ─────────────────────────────────────────
+# ── Phase 1: Tray host (C++) ─────────────────────────────────────────────────
 add_subdirectory(tools/tray_host)
 
-# Build the WinUI 3 settings app via dotnet publish (self-contained for unpackaged WinUI 3)
+# ── Phase 2: Settings UI (WPF / .NET) ─────────────────────────────────────────
 find_program(DOTNET_EXE dotnet)
 if(DOTNET_EXE)
     add_custom_target(settings_app ALL
@@ -44,10 +18,30 @@ if(DOTNET_EXE)
                 --runtime win-x64
                 --self-contained true
                 --output ${CMAKE_BINARY_DIR}/ui/settings_app
-        COMMENT "Publishing WinUI 3 settings app (self-contained x64)"
+        COMMENT "Publishing WPF settings app (self-contained x64)"
     )
 endif()
 
-# ── Phase 4/5: Hardening & Advanced ─────────────────────────────────────────
-add_subdirectory(core/plugin_api)
+# ── Phase 3: Core Driver (Rust) ────────────────────────────────────────────────
+find_program(CARGO_EXE cargo)
+if(CARGO_EXE)
+    add_custom_target(magic_mouse_service ALL
+        COMMAND ${CARGO_EXE} build --release
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/service_rust
+        COMMENT "Building Rust magic_mouse_service"
+    )
+    
+    # Copy the compiled Rust executable to the expected output dir for Wix
+    # Wix expects: $(var.BuildDir)\service\Release\MagicMouseService.exe
+    add_custom_command(TARGET magic_mouse_service POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/service/Release
+        COMMAND ${CMAKE_COMMAND} -E copy
+            ${CMAKE_SOURCE_DIR}/service_rust/target/release/magic_mouse_service.exe
+            ${CMAKE_BINARY_DIR}/service/Release/MagicMouseService.exe
+    )
+else()
+    message(WARNING "Cargo not found. The Rust background service will not be built locally.")
+endif()
+
+# ── Phase 4: Installer ──────────────────────────────────────────────────────
 add_subdirectory(installer/wix)

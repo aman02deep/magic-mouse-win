@@ -3,15 +3,12 @@ add_executable(tray_host WIN32
 )
 
 target_link_libraries(tray_host PRIVATE
-    logger
     shell32      # Shell_NotifyIcon
     user32       # CreatePopupMenu, TrackPopupMenu, MessageBox
     comctl32     # Common controls (LoadIconMetric)
 )
 
-target_include_directories(tray_host PRIVATE
-    ${CMAKE_SOURCE_DIR}/core/logger
-)
+
 
 set_target_properties(tray_host PROPERTIES
     CXX_STANDARD 17

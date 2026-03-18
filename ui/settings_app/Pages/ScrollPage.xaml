@@ -1,70 +1,40 @@
-<Page
-    x:Class="MagicMouse.Settings.Pages.ScrollPage"
-    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-
-    <ScrollViewer Padding="24">
-        <StackPanel Spacing="8" MaxWidth="600">
-
-            <TextBlock Text="Scroll" Style="{ThemeResource TitleTextBlockStyle}" Margin="0,0,0,16"/>
-
-            <!-- Natural scroll -->
-            <ToggleSwitch x:Name="NaturalScrollToggle"
-                          Header="Natural scrolling"
-                          IsOn="True"
-                          Toggled="NaturalScroll_Toggled" />
-            <TextBlock Text="Content moves in the same direction as your finger (like macOS)."
-                       Style="{ThemeResource CaptionTextBlockStyle}"
-                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                       Margin="0,-4,0,16" />
-
-            <MenuFlyoutSeparator Margin="0,0,0,16" />
-
-            <!-- Scroll speed -->
-            <TextBlock Text="Scroll speed" Style="{ThemeResource BodyStrongTextBlockStyle}" />
-            <Slider x:Name="SpeedSlider"
-                    Minimum="1" Maximum="10" Value="5"
-                    TickFrequency="1" TickPlacement="Outside"
-                    ValueChanged="Speed_Changed" />
-
-            <MenuFlyoutSeparator Margin="0,16,0,16" />
-
-            <!-- Inertia -->
-            <ToggleSwitch x:Name="InertiaToggle"
-                          Header="Momentum / inertia scrolling"
-                          IsOn="True"
-                          Toggled="Inertia_Toggled" />
-            <TextBlock Text="Continues scrolling after you lift your finger, decelerating smoothly."
-                       Style="{ThemeResource CaptionTextBlockStyle}"
-                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                       Margin="0,-4,0,0" />
-
-            <StackPanel x:Name="InertiaPanel" Spacing="8" Margin="0,8,0,0">
-                <TextBlock Text="Inertia friction" Style="{ThemeResource BodyTextBlockStyle}" />
-                <Slider x:Name="FrictionSlider"
-                        Minimum="1" Maximum="10" Value="4"
-                        TickFrequency="1" TickPlacement="Outside"
-                        ValueChanged="Friction_Changed" />
-                <TextBlock Text="Lower = longer coast; higher = snappier stop."
-                           Style="{ThemeResource CaptionTextBlockStyle}"
-                           Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+<UserControl x:Class="MagicMouse.Settings.Pages.ScrollPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <ScrollViewer>
+        <StackPanel MaxWidth="600" HorizontalAlignment="Left">
+            <TextBlock Text="Scroll" Style="{StaticResource TitleText}"/>
+            
+            <CheckBox x:Name="NaturalScrollToggle" Content="Natural scrolling" Checked="NaturalScroll_Toggled" Unchecked="NaturalScroll_Toggled"/>
+            <TextBlock Text="Content moves in the same direction as your finger (like macOS)." Style="{StaticResource CaptionText}"/>
+            
+            <Separator Margin="0,15"/>
+            
+            <TextBlock Text="Scroll speed" Style="{StaticResource SubTitleText}"/>
+            <Slider x:Name="SpeedSlider" Minimum="1" Maximum="10" Value="5" TickFrequency="1" TickPlacement="BottomRight" ValueChanged="Speed_Changed"/>
+            
+            <Separator Margin="0,15"/>
+            
+            <CheckBox x:Name="InertiaToggle" Content="Momentum / inertia scrolling" Checked="Inertia_Toggled" Unchecked="Inertia_Toggled"/>
+            <TextBlock Text="Continues scrolling after you lift your finger, decelerating smoothly." Style="{StaticResource CaptionText}"/>
+            
+            <StackPanel x:Name="InertiaPanel" Margin="0,10,0,0">
+                <TextBlock Text="Inertia friction" Style="{StaticResource SubTitleText}"/>
+                <Slider x:Name="FrictionSlider" Minimum="1" Maximum="10" Value="4" TickFrequency="1" TickPlacement="BottomRight" ValueChanged="Friction_Changed"/>
+                <TextBlock Text="Lower = longer coast; higher = snappier stop." Style="{StaticResource CaptionText}"/>
             </StackPanel>
-
-            <MenuFlyoutSeparator Margin="0,16,0,16" />
-
-            <!-- Speed curve -->
-            <TextBlock Text="Acceleration curve" Style="{ThemeResource BodyStrongTextBlockStyle}" />
-            <ComboBox x:Name="CurveCombo" SelectedIndex="1" SelectionChanged="Curve_Changed"
-                      HorizontalAlignment="Stretch">
+            
+            <Separator Margin="0,15"/>
+            
+            <TextBlock Text="Acceleration curve" Style="{StaticResource SubTitleText}"/>
+            <ComboBox x:Name="CurveCombo" SelectedIndex="1" SelectionChanged="Curve_Changed">
                 <ComboBoxItem Content="Linear" />
                 <ComboBoxItem Content="Ease-in-out (recommended)" />
                 <ComboBoxItem Content="Aggressive" />
             </ComboBox>
-
-            <Button x:Name="SaveButton" Content="Save changes" Style="{ThemeResource AccentButtonStyle}"
-                    Click="SaveButton_Click" Margin="0,24,0,0" />
-
+            
+            <TextBlock x:Name="StatusBar" Visibility="Collapsed" Margin="0,10,0,0" FontWeight="SemiBold"/>
+            <Button x:Name="SaveButton" Content="Save changes" Click="SaveButton_Click" HorizontalAlignment="Left"/>
         </StackPanel>
     </ScrollViewer>
-</Page>
+</UserControl>

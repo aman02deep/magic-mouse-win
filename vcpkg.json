@@ -1,8 +1,0 @@
-{
-  "name": "magic-mouse-win",
-  "version": "0.1.0",
-  "dependencies": [
-    "hidapi",
-    "nlohmann-json"
-  ]
-}

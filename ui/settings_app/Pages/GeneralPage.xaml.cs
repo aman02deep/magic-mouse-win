@@ -1,27 +1,26 @@
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
 using System;
 using System.IO;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Media;
 
 namespace MagicMouse.Settings.Pages;
 
-public sealed partial class GeneralPage : Page
+public partial class GeneralPage : UserControl
 {
-    // Path to the shared config consumed by the service/engines.
     private static readonly string ConfigPath = Path.Combine(
         AppContext.BaseDirectory, "..", "..", "..", "..", "..", "configs", "default.json");
 
     private JsonObject _config = new();
+    private bool _isLoaded = false;
 
     public GeneralPage()
     {
-        this.InitializeComponent();
+        InitializeComponent();
         LoadConfig();
     }
-
-    // ── Config I/O ────────────────────────────────────────────────────────────
 
     private void LoadConfig()
     {
@@ -33,47 +32,47 @@ public sealed partial class GeneralPage : Page
                 _config = JsonNode.Parse(text)?.AsObject() ?? new JsonObject();
             }
 
-            EnableToggle.IsOn  = _config["enabled"]?.GetValue<bool>()   ?? true;
-            StartupToggle.IsOn = _config["run_at_startup"]?.GetValue<bool>() ?? true;
+            EnableToggle.IsChecked = _config["enabled"]?.GetValue<bool>() ?? true;
+            StartupToggle.IsChecked = _config["run_at_startup"]?.GetValue<bool>() ?? true;
+            _isLoaded = true;
         }
         catch (Exception ex)
         {
-            ShowStatus(InfoBarSeverity.Error, $"Could not load config: {ex.Message}");
+            ShowStatus(false, $"Could not load config: {ex.Message}");
         }
     }
 
     private void SaveConfig()
     {
+        if (!_isLoaded) return;
         try
         {
-            _config["enabled"]       = EnableToggle.IsOn;
-            _config["run_at_startup"] = StartupToggle.IsOn;
+            _config["enabled"] = EnableToggle.IsChecked == true;
+            _config["run_at_startup"] = StartupToggle.IsChecked == true;
 
             var dir = Path.GetDirectoryName(ConfigPath)!;
             Directory.CreateDirectory(dir);
             File.WriteAllText(ConfigPath,
                 JsonSerializer.Serialize(_config, new JsonSerializerOptions { WriteIndented = true }));
 
-            ShowStatus(InfoBarSeverity.Success, "Settings saved.");
+            ShowStatus(true, "Settings saved.");
         }
         catch (Exception ex)
         {
-            ShowStatus(InfoBarSeverity.Error, $"Could not save config: {ex.Message}");
+            ShowStatus(false, $"Could not save config: {ex.Message}");
         }
     }
 
-    private void ShowStatus(InfoBarSeverity severity, string message)
+    private void ShowStatus(bool success, string message)
     {
-        StatusBar.Severity = severity;
-        StatusBar.Message  = message;
-        StatusBar.IsOpen   = true;
+        StatusBar.Foreground = new SolidColorBrush(success ? Colors.LightGreen : Colors.Salmon);
+        StatusBar.Text = message;
+        StatusBar.Visibility = Visibility.Visible;
     }
-
-    // ── Startup registry helper ───────────────────────────────────────────────
 
     private static void SetStartup(bool enable)
     {
-        const string keyPath  = @"SOFTWARE\Microsoft\Windows\CurrentVersion\Run";
+        const string keyPath = @"SOFTWARE\Microsoft\Windows\CurrentVersion\Run";
         const string valueName = "MagicMouseTrayHost";
 
         using var key = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(keyPath, writable: true);
@@ -90,17 +89,14 @@ public sealed partial class GeneralPage : Page
         }
     }
 
-    // ── Event handlers ────────────────────────────────────────────────────────
-
-    private void EnableToggle_Toggled(object sender, RoutedEventArgs e)
+    private void Toggle_Changed(object sender, RoutedEventArgs e)
     {
         SaveConfig();
-        // TODO: send enable/disable IPC command to the service.
     }
 
-    private void StartupToggle_Toggled(object sender, RoutedEventArgs e)
+    private void StartupToggle_Changed(object sender, RoutedEventArgs e)
     {
-        SetStartup(StartupToggle.IsOn);
+        SetStartup(StartupToggle.IsChecked == true);
         SaveConfig();
     }
 }

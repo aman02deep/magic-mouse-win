@@ -1,48 +1,26 @@
-<Page
-    x:Class="MagicMouse.Settings.Pages.GeneralPage"
-    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-
-    <ScrollViewer Padding="24">
-        <StackPanel Spacing="8" MaxWidth="600">
-
-            <!-- Section header -->
-            <TextBlock Text="General" Style="{ThemeResource TitleTextBlockStyle}" Margin="0,0,0,16"/>
-
-            <!-- Enable/Disable toggle -->
-            <ToggleSwitch x:Name="EnableToggle"
-                          Header="Enable Magic Mouse driver"
-                          IsOn="True"
-                          Toggled="EnableToggle_Toggled" />
-
-            <InfoBar x:Name="StatusBar"
-                     IsOpen="False"
-                     IsClosable="False"
-                     Margin="0,8,0,0" />
-
-            <MenuFlyoutSeparator Margin="0,16,0,16" />
-
-            <!-- Startup with Windows -->
-            <ToggleSwitch x:Name="StartupToggle"
-                          Header="Start with Windows"
-                          IsOn="True"
-                          Toggled="StartupToggle_Toggled" />
-
-            <TextBlock Text="Adds tray_host.exe to your startup folder so Magic Mouse is always active."
-                       Style="{ThemeResource CaptionTextBlockStyle}"
-                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                       Margin="0,-4,0,0" />
-
-            <MenuFlyoutSeparator Margin="0,16,0,16" />
-
-            <!-- Version info -->
-            <StackPanel Orientation="Horizontal" Spacing="8">
-                <TextBlock Text="Version:" Style="{ThemeResource BodyTextBlockStyle}" />
-                <TextBlock x:Name="VersionText" Text="0.1.0"
-                           Style="{ThemeResource BodyStrongTextBlockStyle}" />
+<UserControl x:Class="MagicMouse.Settings.Pages.GeneralPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <ScrollViewer>
+        <StackPanel MaxWidth="600" HorizontalAlignment="Left">
+            <TextBlock Text="General" Style="{StaticResource TitleText}"/>
+            
+            <CheckBox x:Name="EnableToggle" Content="Enable Magic Mouse driver" IsChecked="True" Checked="Toggle_Changed" Unchecked="Toggle_Changed"/>
+            
+            <TextBlock x:Name="StatusBar" Visibility="Collapsed" Margin="0,10,0,10" FontWeight="SemiBold"/>
+            
+            <Separator Margin="0,15"/>
+            
+            <CheckBox x:Name="StartupToggle" Content="Start with Windows" IsChecked="True" Checked="StartupToggle_Changed" Unchecked="StartupToggle_Changed"/>
+            <TextBlock Text="Adds tray_host.exe to your startup folder so Magic Mouse is always active." Style="{StaticResource CaptionText}"/>
+            
+            <Separator Margin="0,15"/>
+            
+            <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                <TextBlock Text="Version: "/>
+                <TextBlock x:Name="VersionText" Text="0.1.2" FontWeight="Bold"/>
             </StackPanel>
-
+            
         </StackPanel>
     </ScrollViewer>
-</Page>
+</UserControl>
