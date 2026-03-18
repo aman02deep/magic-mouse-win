@@ -22,10 +22,9 @@ use windows_service::{
     service_dispatcher,
 };
 
-use device::APPLE_VENDOR_ID;
 use gesture_engine::{GestureEngine, GestureEvent, GestureType, TouchPoint};
 use hid_reader::HidReader;
-use scroll_engine::{ScrollEngine, ScrollParams};
+use scroll_engine::ScrollParams;
 
 define_windows_service!(ffi_service_main, magic_mouse_service_main);
 
@@ -119,7 +118,7 @@ fn driver_loop(shutdown_rx: crossbeam_channel::Receiver<()>) {
         }
     }, gesture_engine::GestureParams::default());
 
-    let mut current_device_path = String::new();
+    let mut _current_device_path = String::new();
     let mut reader: Option<HidReader> = None;
 
     loop {
@@ -139,7 +138,7 @@ fn driver_loop(shutdown_rx: crossbeam_channel::Receiver<()>) {
                 if let Some(mouse) = mice.first() {
                     if let Ok(r) = HidReader::new(&api, &mouse.path) {
                         reader = Some(r);
-                        current_device_path = mouse.path.clone();
+                        let _current_device_path = mouse.path.clone();
                     }
                 }
             }

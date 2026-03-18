@@ -34,17 +34,16 @@ impl IpcServer {
                         PIPE_UNLIMITED_INSTANCES,
                         4096, 4096, 0, None
                     )
-                };
+                }.unwrap_or(INVALID_HANDLE_VALUE);
 
                 if pipe == INVALID_HANDLE_VALUE {
                     break;
                 }
 
                 let connected = unsafe { ConnectNamedPipe(pipe, None) };
-                if !connected.is_ok() {
-                    let err = unsafe { GetLastError() };
-                    if err != ERROR_PIPE_CONNECTED {
-                        unsafe { CloseHandle(pipe).ok() };
+                if let Err(e) = connected {
+                    if e.code() != ERROR_PIPE_CONNECTED.into() {
+                        unsafe { let _ = CloseHandle(pipe); }
                         continue;
                     }
                 }
@@ -53,7 +52,7 @@ impl IpcServer {
                     cli_list.lock().unwrap().push(pipe);
                 }
 
-                let cli_list_clone = Arc::clone(&cli_list);
+                let cli_list_clone: Arc<Mutex<Vec<HANDLE>>> = Arc::clone(&cli_list);
                 let handler_clone = Arc::clone(&handler);
 
                 thread::spawn(move || {

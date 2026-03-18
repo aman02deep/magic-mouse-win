@@ -9,7 +9,7 @@ pub struct HidReader {
 
 impl HidReader {
     pub fn new(api: &HidApi, path: &str) -> Result<Self, HidError> {
-        let c_path = CString::new(path).map_err(|_| HidError::OpenFailed)?;
+        let c_path = CString::new(path).expect("CString mapping failed");
         let device = api.open_path(&c_path)?;
         
         device.set_blocking_mode(false)?;

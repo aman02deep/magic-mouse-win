@@ -11,7 +11,7 @@ pub fn inject_scroll_v(delta: f32) {
     let wheel_delta = (delta * 120.0) as i32;
 
     let mut input = INPUT {
-        type_: INPUT_MOUSE,
+        r#type: INPUT_MOUSE,
         Anonymous: INPUT_0 {
             mi: MOUSEINPUT {
                 dx: 0,
@@ -35,7 +35,7 @@ pub fn inject_scroll_h(delta: f32) {
     let wheel_delta = (delta * 120.0) as i32;
 
     let mut input = INPUT {
-        type_: INPUT_MOUSE,
+        r#type: INPUT_MOUSE,
         Anonymous: INPUT_0 {
             mi: MOUSEINPUT {
                 dx: 0,
