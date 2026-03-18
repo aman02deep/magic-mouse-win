@@ -18,9 +18,9 @@
             <CheckBox x:Name="InertiaToggle" Content="Momentum / inertia scrolling" Checked="Inertia_Toggled" Unchecked="Inertia_Toggled"/>
             <TextBlock Text="Continues scrolling after you lift your finger, decelerating smoothly." FontSize="12" Foreground="Gray"/>
             
-            <StackPanel Margin="10,5,0,0">
+            <StackPanel x:Name="InertiaPanel" Margin="10,5,0,0">
                 <TextBlock Text="Inertia friction" FontSize="16" FontWeight="SemiBold"/>
-                <Slider x:Name="FrictionSlider" Minimum="0" Maximum="1" TickFrequency="0.05" ValueChanged="Slider_ValueChanged"/>
+                <Slider x:Name="FrictionSlider" Minimum="0" Maximum="1" TickFrequency="0.05" ValueChanged="Friction_Changed"/>
                 <TextBlock Text="Lower = longer coast; higher = snappier stop." FontSize="12" Foreground="Gray"/>
             </StackPanel>
             
