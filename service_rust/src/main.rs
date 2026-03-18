@@ -246,6 +246,7 @@ fn driver_loop(shutdown_rx: crossbeam_channel::Receiver<()>) {
                         touching = false;
                     }
                 }
+                } // Closes Ok(bytes) if bytes > 0 =>
                 Ok(_) => {
                     // 0 bytes read, just continue
                 }
