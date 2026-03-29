@@ -1,29 +1,19 @@
-# Build output
-build/
-out/
-.vs/
-*.user
-
-# vcpkg
-vcpkg_installed/
-
-# HID log captures
-*.bin
-
-# Compiled binaries
+# Binary
+MagicMouseUtil.exe
 *.exe
-*.dll
-*.lib
-*.pdb
 
-# CMake
-CMakeCache.txt
-CMakeFiles/
-cmake_install.cmake
+# Go
+/vendor/
 
-# VS Code
+# Logs
+*.log
+
+# IDE
 .vscode/
+.idea/
+*.swp
+*.swo
 
-# Windows
+# OS
 Thumbs.db
-Desktop.ini
+.DS_Store

@@ -1,60 +1,84 @@
-# Magic Mouse Windows Driver
+# Magic Mouse Utility (Go)
 
-A free, open-source alternative to Magic Mouse Utilities for Windows.
-Delivers macOS-quality smooth scrolling and gesture support — no licensing cost.
+A lightweight, portable Windows utility to monitor your Apple Magic Mouse — battery level, device info, connection status — with a system tray icon and live web dashboard.
+
+**No admin access required. No installation. Unzip and run.**
 
 ## Features
-- Smooth scrolling with macOS-like inertia (vertical + horizontal)
-- Full gesture support: swipes, taps, three-finger tap
-- Stable Bluetooth support across chipsets
-- Lightweight background service with auto-start
-- WinUI 3 configuration UI (optional)
 
-## Build Requirements
-- Windows 10 21H2 or later
-- Visual Studio 2022 with "Desktop development with C++" workload
-- CMake 3.20+
-- vcpkg
+- 🖱 Detects Magic Mouse via BLE scanning (with PowerShell fallback)
+- 🔋 Battery level (best-effort — Windows BT limitation)
+- 📡 Live signal strength (RSSI)
+- 🖥 Web dashboard at `http://localhost:7878` with live SSE updates
+- 🔔 System tray icon with battery info (pure Go, no CGo)
+- 🆔 Stable device ID from Bluetooth MAC address
+- 📦 Portable single exe — no install, no registry, no admin
 
-## Building
+## Requirements
 
-```powershell
-# 1. Clone vcpkg and integrate (one-time setup)
-git clone https://github.com/microsoft/vcpkg.git C:\vcpkg
-C:\vcpkg\bootstrap-vcpkg.bat
-C:\vcpkg\vcpkg integrate install
+- Windows 10/11
+- Go 1.22+ (for building — not needed to run)
+- Apple Magic Mouse paired via Bluetooth
 
-# 2. Configure
-cmake -B build -S . -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake
+## Build & Run
 
-# 3. Build
-cmake --build build --config Debug
+```bat
+git clone <repo>
+cd magicmouse-util
+build.bat
+MagicMouseUtil.exe
 ```
 
-## Phase 0 — HID Logger
+### Command-Line Flags
 
-The first tool to build. Connect your Magic Mouse via Bluetooth, then run:
-
-```powershell
-.\build\tools\hid_logger\Debug\hid_logger.exe
-```
-
-The logger lists all detected Magic Mouse devices, lets you select one,
-then dumps raw HID packets to stdout (hex) and to a timestamped `.bin` file.
-
-Save the `.bin` file — it is used to reverse-engineer the packet format in Phase 1.
+| Flag | Default | Description |
+|---|---|---|
+| `--version` | | Print version and exit |
+| `--no-tray` | `false` | Run without system tray (headless) |
+| `--port` | `:7878` | Web dashboard port |
+| `--no-browser` | `false` | Don't auto-open browser |
 
 ## Project Structure
+
 ```
-core/           - Core engine libraries (hid_reader, device_detector, etc.)
-service/        - Windows background service
-integration/    - SendInput wrapper
-ui/             - WinUI 3 frontend
-tools/          - Developer tools (hid_logger, packet_visualizer)
-configs/        - Default configuration JSON
-docs/           - Architecture, packet format, troubleshooting
-installer/      - WiX installer scripts
+magicmouse-util/
+├── cmd/
+│   └── main.go                  # Entry point
+├── internal/
+│   ├── device/
+│   │   └── mouse.go             # Device model + ID generation
+│   ├── bluetooth/
+│   │   ├── monitor.go           # BLE scanning + PowerShell fallback
+│   │   ├── battery_hid.go       # Battery reading (DEVPKEY, registry)
+│   │   └── powershell.go        # PowerShell helpers
+│   ├── server/
+│   │   └── server.go            # HTTP + SSE server + embedded dashboard
+│   └── tray/
+│       └── tray.go              # Pure Go system tray (Shell_NotifyIconW)
+├── build.bat
+├── go.mod
+└── README.md
 ```
 
+## How It Works
+
+1. **BLE Scan** — Uses `tinygo.org/x/bluetooth` to scan for Magic Mouse advertisements
+2. **PowerShell Fallback** — Falls back to `Get-PnpDevice` if BLE adapter unavailable
+3. **Battery** — Reads `DEVPKEY_Device_BatteryLevel` from HID nodes (best-effort)
+4. **Dashboard** — Embedded HTML with Server-Sent Events for live updates
+5. **Tray** — Pure Win32 `Shell_NotifyIconW` — no CGo, no external deps
+
+## Battery Note
+
+> Windows has limited Bluetooth battery reporting for Magic Mouse. If battery shows as "Unavailable", this is a Windows OS limitation, not a bug.
+
+## Dependencies
+
+| Package | Purpose |
+|---|---|
+| `tinygo.org/x/bluetooth` | BLE device scanning via WinRT |
+| `golang.org/x/sys` | Win32 syscalls (tray, PowerShell) |
+
 ## License
+
 MIT
