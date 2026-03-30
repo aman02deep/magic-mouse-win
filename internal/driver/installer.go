@@ -9,20 +9,65 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"sync"
+	"syscall"
 )
 
 //go:embed assets/drivers/amd64/*
 var driverAssets embed.FS
 
-// IsDriverInstalled checks if the Precision Touchpad / BootCamp driver is present in the Windows Driver Store
+// cachedInstalled caches the driver check result so we don't spawn pnputil on every SSE poll
+var (
+	cachedInstalled *bool
+	cacheMu         sync.Mutex
+)
+
+// IsDriverInstalled checks if the BootCamp driver is installed.
+// Result is cached after the first check — call InvalidateCache() after installation.
 func IsDriverInstalled() bool {
-	// A simple heuristic is to check if the driver file exists in System32 or if pnputil lists it.
-	// Since installing via pnputil places it in the driver store, let's query pnputil.
-	out, err := exec.Command("pnputil", "/enum-drivers").Output()
+	cacheMu.Lock()
+	defer cacheMu.Unlock()
+
+	if cachedInstalled != nil {
+		return *cachedInstalled
+	}
+
+	result := checkDriverInstalled()
+	cachedInstalled = &result
+	return result
+}
+
+// InvalidateCache forces the next IsDriverInstalled() call to re-check from the OS.
+func InvalidateCache() {
+	cacheMu.Lock()
+	defer cacheMu.Unlock()
+	cachedInstalled = nil
+}
+
+// checkDriverInstalled does the actual OS-level check (hidden window, no flash).
+func checkDriverInstalled() bool {
+	// Check if the Apple driver .sys file is installed in System32
+	driverPaths := []string{
+		`C:\Windows\System32\drivers\AppleWirelessMouse.sys`,
+		`C:\Windows\System32\drivers\AppleWirelessMouse64.sys`,
+	}
+	for _, p := range driverPaths {
+		if _, err := os.Stat(p); err == nil {
+			return true
+		}
+	}
+
+	// Fallback: query pnputil but with hidden window
+	cmd := exec.Command("pnputil", "/enum-drivers")
+	cmd.SysProcAttr = &syscall.SysProcAttr{
+		HideWindow:    true,
+		CreationFlags: 0x08000000,
+	}
+	out, err := cmd.Output()
 	if err != nil {
 		return false
 	}
-	return strings.Contains(string(out), "AmtPtpDevice.inf") || strings.Contains(string(out), "AppleWirelessMouse.inf")
+	return strings.Contains(string(out), "AppleWirelessMouse.inf")
 }
 
 // InstallDriver extracts the embedded signed driver files to a temporary directory
@@ -35,7 +80,7 @@ func InstallDriver() error {
 	if err != nil {
 		return fmt.Errorf("failed to create temp dir: %w", err)
 	}
-	defer os.RemoveAll(tempDir) // Clean up after install
+	defer os.RemoveAll(tempDir)
 
 	// 2. Extract embedded files to the temporary directory
 	entries, err := fs.ReadDir(driverAssets, "assets/drivers/amd64")
@@ -72,15 +117,22 @@ func InstallDriver() error {
 
 	log.Printf("[Installer] Extracted driver files to %s. Running pnputil...", tempDir)
 
-	// 3. Install using PnPUtil (Requires Admin)
+	// 3. Install using PnPUtil (hidden window, requires Admin)
 	cmd := exec.Command("pnputil", "/add-driver", infPath, "/install")
+	cmd.SysProcAttr = &syscall.SysProcAttr{
+		HideWindow:    true,
+		CreationFlags: 0x08000000, // CREATE_NO_WINDOW
+	}
 	out, err := cmd.CombinedOutput()
-	
+
 	log.Printf("[Installer] pnputil output:\n%s", string(out))
 
 	if err != nil {
-		return fmt.Errorf("pnputil failed (Ensure you are running as Administrator): %w\n%s", err, string(out))
+		return fmt.Errorf("pnputil failed (ensure you are running as Administrator): %w\n%s", err, string(out))
 	}
+
+	// Force re-check next time IsDriverInstalled is called
+	InvalidateCache()
 
 	log.Println("[Installer] Driver successfully installed!")
 	return nil

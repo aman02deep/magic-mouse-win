@@ -499,6 +499,7 @@ function render(d) {
   ` + "`" + `;
 
   document.getElementById('content').innerHTML = ` + "`" + `
+    ${driverHTML}
     <div class="info-grid">
       <div class="info-row">
         <span class="info-label">Name</span>
@@ -522,7 +523,6 @@ function render(d) {
       </div>
     </div>
     ${batteryHTML}
-    ${driverHTML}
   ` + "`" + `;
 
   document.getElementById('last-update').innerHTML = '<span class="stream-dot"></span>Live — ' + new Date().toLocaleTimeString();
